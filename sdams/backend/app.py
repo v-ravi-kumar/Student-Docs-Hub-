@@ -6,6 +6,7 @@ from extensions import db, jwt
 from config import Config
 from routes.auth import auth_bp
 from routes.documents import doc_bp
+from routes.admin import admin_bp
 from models import User
 
 def create_app(config_class=Config):
@@ -20,6 +21,7 @@ def create_app(config_class=Config):
     # Register blueprints
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(doc_bp, url_prefix='/api/documents')
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
     # Serve static uploads
     @app.route('/uploads/<path:filename>')

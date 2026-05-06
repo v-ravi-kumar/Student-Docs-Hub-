@@ -156,7 +156,7 @@ def admin_login():
     password = data.get('password', '')
 
     print(f"DEBUG: Admin Login attempt for: {admin_id}")
-    user = User.query.filter_by(register_number=admin_id, role='admin').first()
+    user = User.query.filter(User.register_number == admin_id, User.role.in_(['admin', 'root_admin', 'sub_admin'])).first()
     
     if not user:
         print(f"DEBUG: Admin {admin_id} NOT FOUND in database.")
@@ -190,7 +190,7 @@ def admin_login():
 def register_student():
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
-    if not user or user.role != 'admin':
+    if not user or user.role not in ['admin', 'root_admin', 'sub_admin']:
         return jsonify({"msg": "Only admins can register students"}), 403
 
     data = request.get_json()
@@ -227,7 +227,7 @@ def register_student():
 def get_students():
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
-    if not user or user.role != 'admin':
+    if not user or user.role not in ['admin', 'root_admin', 'sub_admin']:
         return jsonify({"msg": "Only admins can view all students"}), 403
 
     students = User.query.filter_by(role='student').all()
@@ -262,7 +262,7 @@ def register_admin():
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
     # Only the initial admin (admin_id = 'admin') can register new admins
-    if not user or user.role != 'admin' or user.register_number not in ['admin', 'ravi kumar']:
+    if not user or user.role not in ['admin', 'root_admin'] or user.register_number not in ['admin', 'ravi kumar']:
         return jsonify({"msg": "Only the initial admin can register other admins"}), 403
 
     data = request.get_json()
@@ -318,7 +318,7 @@ def student_forgot_password():
 def admin_reset_student_password():
     user_id = get_jwt_identity()
     admin = User.query.get(user_id)
-    if not admin or admin.role != 'admin':
+    if not admin or admin.role not in ['admin', 'root_admin', 'sub_admin']:
         return jsonify({"msg": "Only admins can perform this action"}), 403
 
     data = request.get_json()
@@ -347,7 +347,7 @@ def admin_reset_student_password():
 def get_activity_logs():
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
-    if not user or user.role != 'admin':
+    if not user or user.role not in ['admin', 'root_admin', 'sub_admin']:
         return jsonify({"msg": "Only admins can view activity logs"}), 403
 
     logs = ActivityLog.query.order_by(ActivityLog.timestamp.desc()).all()

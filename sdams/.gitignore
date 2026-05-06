@@ -18,3 +18,7 @@ instance/
 # OS
 .DS_Store
 Thumbs.db
+
+# Database & Uploads
+*.db
+backend/uploads/

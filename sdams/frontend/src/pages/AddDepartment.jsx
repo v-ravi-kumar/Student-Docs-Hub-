@@ -1,119 +1,78 @@
-import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { PlusCircle, ArrowLeft, Bookmark, Hash } from "lucide-react";
-import api from "../api";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { adminApi } from '../api';
+import { Building2, Plus, ArrowLeft } from 'lucide-react';
 
 const AddDepartment = () => {
-  const [formData, setFormData] = useState({
-    dept_id: "",
-    name: "",
-  });
-  const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deptId, setDeptId] = useState('');
+  const [name, setName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const location = useLocation();
-  const fromAdmin = location.state?.from === "admin";
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
+    setLoading(true);
+    setError('');
 
     try {
-      await api.post("/auth/departments", formData);
-      // Redirect back to original page
-      navigate(fromAdmin ? "/admin-dashboard" : "/student-signup");
+      await adminApi.addDepartment({ dept_id: deptId, name });
+      alert("Department added successfully!");
+      navigate(-1); // Go back to previous page (SubAdminManagement or RegisterStudent)
     } catch (err) {
-      setError(err.response?.data?.msg || "Failed to add department. Please try again.");
+      setError(err.response?.data?.msg || "Failed to add department. It may already exist.");
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="app-container" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
-      <div className="glass-panel" style={{ width: "100%", maxWidth: "500px" }}>
+    <div className="app-container" style={{ alignItems: 'center', justifyContent: 'center', background: 'var(--bg-gradient)' }}>
+      <div className="glass-panel" style={{ width: '100%', maxWidth: '500px' }}>
         <button 
-          onClick={() => navigate(fromAdmin ? "/admin-dashboard" : "/student-signup")}
-          style={{ 
-            display: "flex", 
-            alignItems: "center", 
-            gap: "0.5rem", 
-            background: "none", 
-            border: "none", 
-            color: "var(--text-secondary)", 
-            cursor: "pointer",
-            marginBottom: "1.5rem",
-            fontSize: "0.9rem"
-          }}
+          onClick={() => navigate(-1)} 
+          style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', cursor: 'pointer' }}
         >
-          <ArrowLeft size={16} />
-          Back to {fromAdmin ? "Dashboard" : "Signup"}
+          <ArrowLeft size={18} /> Back
         </button>
 
-        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <div style={{ background: "var(--primary)", width: "56px", height: "56px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem" }}>
-            <PlusCircle size={28} color="white" />
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{ background: 'var(--primary)', width: '60px', height: '60px', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+            <Building2 size={32} color="white" />
           </div>
-          <h1 style={{ fontSize: "1.6rem", fontWeight: "bold", color: "#fff" }}>Add New Department</h1>
-          <p style={{ color: "var(--text-secondary)", marginTop: "0.5rem" }}>Create a new department category for the portal</p>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Add New Department</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>Expand the system by adding a new academic department</p>
         </div>
 
-        {error && (
-          <div style={{ background: "rgba(239, 68, 68, 0.2)", color: "#F87171", padding: "0.8rem", borderRadius: "10px", marginBottom: "1.5rem", textAlign: "center", fontSize: "0.9rem" }}>
-            {error}
-          </div>
-        )}
+        {error && <div style={{ background: '#ef4444', color: 'white', padding: '0.75rem', borderRadius: '8px', marginBottom: '1.5rem', textAlign: 'center' }}>{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label" htmlFor="dept_id">Department ID</label>
-            <div style={{ position: "relative" }}>
-              <Hash size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-secondary)" }} />
-              <input
-                id="dept_id"
-                name="dept_id"
-                type="text"
-                className="form-input"
-                style={{ paddingLeft: "2.8rem" }}
-                placeholder="Ex: DEPT-CS"
-                value={formData.dept_id}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            <label className="form-label">Department ID (Code)</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="e.g. CSE, MECH, IT"
+              value={deptId}
+              onChange={(e) => setDeptId(e.target.value.toUpperCase())}
+              required
+            />
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="name">Department Name</label>
-            <div style={{ position: "relative" }}>
-              <Bookmark size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-secondary)" }} />
-              <input
-                id="name"
-                name="name"
-                type="text"
-                className="form-input"
-                style={{ paddingLeft: "2.8rem" }}
-                placeholder="Ex: Computer Science and Engineering"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            <label className="form-label">Department Name</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="e.g. Computer Science Engineering"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
           </div>
 
-          <button 
-            type="submit" 
-            className="btn-primary" 
-            style={{ width: "100%", marginTop: "1rem", padding: "0.8rem" }}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Saving..." : "Save Department"}
+          <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={loading}>
+            {loading ? 'Adding...' : 'OK'}
           </button>
         </form>
       </div>

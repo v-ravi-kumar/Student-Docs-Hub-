@@ -15,9 +15,20 @@ const AdminLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    // Clear stale data to avoid role-mismatch during redirection
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('department_id');
+    
     try {
-      await adminLogin(adminId, password);
-      navigate('/admin-dashboard');
+      const response = await adminLogin(adminId, password);
+      const userRole = response.user.role;
+      if (userRole === 'root_admin') {
+        navigate('/admin/root-dashboard');
+      } else {
+        navigate('/admin/department-dashboard');
+      }
     } catch (err) {
       setError(err.response?.data?.msg || 'Login failed. Please check credentials.');
     }
