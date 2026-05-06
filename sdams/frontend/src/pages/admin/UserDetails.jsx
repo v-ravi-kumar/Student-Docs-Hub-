@@ -11,10 +11,16 @@ const UserDetails = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({});
   const [departments, setDepartments] = useState([]);
-  const [docTypes, setDocTypes] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadType, setUploadType] = useState('');
+  const [customDocName, setCustomDocName] = useState('');
+
+  const documentCategories = [
+    '10th Marksheet', '12th Marksheet', 'DC Certificate', 'FG Certificate', 
+    'Income Certificate', 'Community Certificate', 'Negative Certificate', 
+    'University Marksheet', 'Student ID Card', 'Others'
+  ];
 
   useEffect(() => {
     fetchData();
@@ -22,15 +28,13 @@ const UserDetails = () => {
 
   const fetchData = async () => {
     try {
-      const [userRes, deptsRes, typesRes] = await Promise.all([
+      const [userRes, deptsRes] = await Promise.all([
         adminApi.getUserDetails(id),
-        adminApi.getDepartments(),
-        adminApi.getDocTypes()
+        adminApi.getDepartments()
       ]);
       setData(userRes.data);
       setEditForm(userRes.data.profile);
       setDepartments(deptsRes.data);
-      setDocTypes(typesRes.data);
     } catch (error) {
       console.error("Error fetching user details:", error);
       alert("Failed to load student details");
@@ -64,11 +68,15 @@ const UserDetails = () => {
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!uploadFile || !uploadType) return alert("Select file and type");
+    const finalDocType = uploadType === 'Others' ? customDocName : uploadType;
+    
+    if (!uploadFile || !finalDocType) {
+      return alert("Please select a file and specify the document type.");
+    }
 
     const formData = new FormData();
     formData.append('file', uploadFile);
-    formData.append('doc_type', uploadType);
+    formData.append('doc_type', finalDocType);
     formData.append('student_id', data.profile.register_number);
     formData.append('student_name', data.profile.username);
     formData.append('department', data.profile.department_id);
@@ -78,6 +86,7 @@ const UserDetails = () => {
       await adminApi.uploadForStudent(formData);
       setUploadFile(null);
       setUploadType('');
+      setCustomDocName('');
       fetchData();
       alert("Document uploaded successfully");
     } catch (error) {
@@ -180,21 +189,44 @@ const UserDetails = () => {
           <section className="glass-panel">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FileText size={20} /> Documents</h3>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <select 
                   className="form-input" 
-                  style={{ width: '150px', padding: '0.5rem' }}
+                  style={{ width: '180px', padding: '0.5rem' }}
                   value={uploadType}
                   onChange={e => setUploadType(e.target.value)}
                 >
                   <option value="">Select Type</option>
-                  {docTypes.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+                  {documentCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                 </select>
-                <label className="btn-primary" style={{ cursor: 'pointer', padding: '0.5rem 1rem' }}>
-                  <Upload size={18} /> {uploading ? '...' : 'Upload'}
+
+                {uploadType === 'Others' && (
+                  <input 
+                    type="text"
+                    placeholder="Enter document name"
+                    className="form-input"
+                    style={{ width: '180px', padding: '0.5rem' }}
+                    value={customDocName}
+                    onChange={e => setCustomDocName(e.target.value)}
+                  />
+                )}
+
+                <label className="btn-primary" style={{ cursor: 'pointer', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Upload size={18} /> 
+                  {uploading ? '...' : (uploadFile ? 'File Selected' : 'Choose File')}
                   <input type="file" hidden onChange={e => setUploadFile(e.target.files[0])} />
                 </label>
-                {uploadFile && <button onClick={handleUpload} className="btn-primary" style={{ background: '#10b981' }}>Confirm</button>}
+
+                {uploadFile && (
+                  <button 
+                    onClick={handleUpload} 
+                    className="btn-primary" 
+                    style={{ background: '#10b981', padding: '0.5rem 1.5rem' }}
+                    disabled={uploading}
+                  >
+                    {uploading ? 'Uploading...' : 'Confirm Upload'}
+                  </button>
+                )}
               </div>
             </div>
 

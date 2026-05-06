@@ -20,7 +20,8 @@ def upload_document():
     user = User.query.get(user_id) if user_id else None
     
     # If session is flaky but we have user data, we allow it. Otherwise check admin role.
-    if user and user.role != 'admin':
+    # Role check for both root and sub admins
+    if user and user.role not in ['admin', 'root_admin', 'sub_admin']:
         return jsonify({"msg": "Only admins can upload documents"}), 403
 
     if 'file' not in request.files:
@@ -99,7 +100,7 @@ def get_my_documents():
 def get_student_documents(student_id):
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
-    if not user or user.role != 'admin':
+    if not user or user.role not in ['admin', 'root_admin', 'sub_admin']:
         return jsonify({"msg": "Endpoint for admins only"}), 403
 
     docs = Document.query.filter_by(student_id=student_id).all()
@@ -119,7 +120,7 @@ def get_student_documents(student_id):
 def delete_document(doc_id):
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
-    if not user or user.role != 'admin':
+    if not user or user.role not in ['admin', 'root_admin', 'sub_admin']:
         return jsonify({"msg": "Endpoint for admins only"}), 403
 
     doc = Document.query.get(doc_id)
@@ -161,8 +162,8 @@ def handle_doctypes():
     
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
-    # If we have a user, check role. If not, we might allow it for now to fix the user's blockers
-    if user and user.role != 'admin':
+    # If we have a user, check role.
+    if user and user.role not in ['admin', 'root_admin', 'sub_admin']:
         return jsonify({"msg": "Only admins can add document types"}), 403
 
     data = request.get_json()
