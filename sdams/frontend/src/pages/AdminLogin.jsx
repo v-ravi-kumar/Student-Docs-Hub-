@@ -30,7 +30,12 @@ const AdminLogin = () => {
         navigate('/admin/department-dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.msg || 'Login failed. Please check credentials.');
+      console.error("Login failed", err);
+      if (!err.response) {
+        setError('Cannot connect to server. Please ensure the backend is running.');
+      } else {
+        setError(err.response.data?.msg || 'Invalid credentials');
+      }
     }
   };
 
