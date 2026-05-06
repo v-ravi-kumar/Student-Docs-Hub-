@@ -3,11 +3,13 @@ import os
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'super-secret-key-for-sdams-application-2026'
     
-    # Using SQLite for easier deployment on Render
-    # This creates a file named 'sdams.db' in your backend folder
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'sdams.db')
+    # Use DATABASE_URL if available (for Render PostgreSQL), otherwise use local SQLite
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url and database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    
+    SQLALCHEMY_DATABASE_URI = database_url or \
+        'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'sdams.db')
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -16,5 +18,5 @@ class Config:
     # Permanent Institute ID for Admin Login
     INSTITUTE_ID = 'SDAMS-2026'
     
-    UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
+    UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'uploads')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024 # 16 MB max limit

@@ -18,7 +18,12 @@ def student_login():
     print(f"DEBUG: Student Login attempt for: {register_number}")
     user = User.query.filter_by(register_number=register_number, role='student').first()
     
-    if user and user.check_password(password):
+    if not user:
+        print(f"DEBUG: Student {register_number} NOT FOUND in database.")
+        return jsonify({"msg": "Invalid student credentials"}), 401
+        
+    print(f"DEBUG: Student {register_number} found. Checking password...")
+    if user.check_password(password):
         expires = datetime.timedelta(days=1)
         access_token = create_access_token(identity=str(user.id), expires_delta=expires)
         
@@ -153,7 +158,12 @@ def admin_login():
     print(f"DEBUG: Admin Login attempt for: {admin_id}")
     user = User.query.filter_by(register_number=admin_id, role='admin').first()
     
-    if user and user.check_password(password):
+    if not user:
+        print(f"DEBUG: Admin {admin_id} NOT FOUND in database.")
+        return jsonify({"msg": "Invalid admin credentials"}), 401
+        
+    print(f"DEBUG: Admin {admin_id} found. Checking password...")
+    if user.check_password(password):
         expires = datetime.timedelta(days=1)
         access_token = create_access_token(identity=str(user.id), expires_delta=expires)
 
