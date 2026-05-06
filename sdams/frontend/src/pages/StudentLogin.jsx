@@ -95,17 +95,6 @@ const StudentLogin = () => {
         </form>
 
         <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-          {isLogin && (
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-              <button 
-                onClick={() => navigate('/forgot-password')} 
-                style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline' }}
-                type="button"
-              >
-                Forgot Password?
-              </button>
-            </p>
-          )}
           <p style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
             Don't have an account?
             <button 
