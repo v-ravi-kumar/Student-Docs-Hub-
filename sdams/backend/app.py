@@ -6,6 +6,7 @@ from extensions import db, jwt
 from config import Config
 from routes.auth import auth_bp
 from routes.documents import doc_bp
+from models import User
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -28,11 +29,32 @@ def create_app(config_class=Config):
     with app.app_context():
         # Create all tables
         db.create_all()
+        
+        # Auto-create admin user if it doesn't exist
+        if not User.query.filter_by(register_number='admin').first():
+            admin = User(
+                username='System Admin',
+                register_number='admin',
+                role='admin'
+            )
+            admin.set_password('admin123')
+            db.session.add(admin)
+            
+            # Also create ravi kumar admin
+            ravi = User(
+                username='ravi kumar',
+                register_number='ravi kumar',
+                role='admin'
+            )
+            ravi.set_password('ravi10000')
+            db.session.add(ravi)
+            
+            db.session.commit()
+            print("Admin accounts created automatically.")
 
     return app
 
 if __name__ == '__main__':
     app = create_app()
-    # Ensure upload folder exists
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     app.run(debug=True, port=5000)
