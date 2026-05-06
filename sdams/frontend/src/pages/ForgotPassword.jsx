@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { KeyRound, User as UserIcon, Calendar, Phone, Eye, EyeOff } from 'lucide-react';
 import logo from '../assets/logo.png';
 
@@ -9,6 +9,7 @@ const ForgotPassword = () => {
   const [dob, setDob] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -19,16 +20,13 @@ const ForgotPassword = () => {
     setError('');
     setSuccessMsg('');
     
-    // Strong Password Policy (Gmail-like)
-    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
-    if (!passwordRegex.test(newPassword)) {
-      alert("You have entered an invalid password. Please correct it to meet all the conditions above.");
-      setError("Password must be at least 8 characters long and include a mix of letters, numbers, and symbols.");
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match");
       return;
     }
 
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/student/forgot-password', {
+      const res = await api.post('/auth/student/forgot-password', {
         register_number: registerNumber,
         dob,
         phone_number: phoneNumber,
@@ -122,18 +120,23 @@ const ForgotPassword = () => {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-            <div style={{ marginTop: "0.6rem", fontSize: "0.8rem", color: "#000000", background: "rgba(255,255,255,0.15)", padding: "0.6rem 0.9rem", borderRadius: "8px", border: "1px solid rgba(0,0,0,0.1)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
-                <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#000" }}></div>
-                Password must be at least 8 characters.
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#000" }}></div>
-                It must include letters, numbers, and symbols.
-              </div>
+          </div>
+          <div className="form-group" style={{ marginTop: '1rem' }}>
+            <label className="form-label">Confirm New Password</label>
+            <div style={{ position: 'relative' }}>
+              <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+              <input
+                type={showPassword ? "text" : "password"}
+                className="form-input"
+                style={{ paddingLeft: '2.5rem' }}
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
             </div>
           </div>
-          <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={!!successMsg}>
+          <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '1.5rem' }} disabled={!!successMsg}>
             Reset Password
           </button>
         </form>

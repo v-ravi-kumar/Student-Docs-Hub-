@@ -74,14 +74,7 @@ const StudentSignup = () => {
       return false;
     }
     
-    // Strong Password Policy (Gmail-like)
-    // At least 8 chars, mix of letters, numbers, and symbols
-    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
-    if (!passwordRegex.test(formData.password)) {
-      alert("You have entered an invalid password. Please correct it to meet all the conditions above.");
-      setError("Password must be at least 8 characters long and include a mix of letters, numbers, and symbols.");
-      return false;
-    }
+    return true;
 
     return true;
   };
@@ -375,16 +368,6 @@ const StudentSignup = () => {
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
-              </div>
-              <div style={{ marginTop: "0.6rem", fontSize: "0.8rem", color: "#000000", background: "rgba(255,255,255,0.15)", padding: "0.6rem 0.9rem", borderRadius: "8px", border: "1px solid rgba(0,0,0,0.1)", fontWeight: "400" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
-                  <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#000" }}></div>
-                  Password must be at least 8 characters.
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#000" }}></div>
-                  It must include letters, numbers, and symbols.
-                </div>
               </div>
             </div>
 
